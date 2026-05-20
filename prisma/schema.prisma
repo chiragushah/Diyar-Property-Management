@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  role          String    @default("MANAGER") // ADMIN, MANAGER, TENANT, OWNER
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  managedProperties Property[] @relation("PropertyManager")
+  ownedProperties   Property[] @relation("PropertyOwner")
+  tenantProfile     Tenant?
+  maintenanceRequests MaintenanceRequest[]
+  leads             Lead[]
+  documents         Document[]
+  permissions       UserPermission[]
+  invoices          Invoice[]
+}
+
+model UserPermission {
+  id        String   @id @default(cuid())
+  action    String   // e.g., "CREATE_PROPERTY", "DELETE_LEAD"
+  resource  String   // e.g., "PROPERTIES", "CRM"
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, action, resource])
+}
+
+model Property {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  description String?
+  image       String?
+  type        String   // RESIDENTIAL, COMMERCIAL, INDUSTRIAL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  managerId   String?
+  manager     User?    @relation("PropertyManager", fields: [managerId], references: [id])
+  ownerId     String?
+  owner       User?    @relation("PropertyOwner", fields: [ownerId], references: [id])
+  units       Unit[]
+  documents   Document[]
+  projects    Project[]
+}
+
+model Unit {
+  id          String   @id @default(cuid())
+  unitNumber  String
+  floor       String?
+  rentAmount  Float
+  status      String   @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  leases      Lease[]
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id])
+  leases      Lease[]
+  documents   Document[]
+}
+
+model Lease {
+  id            String   @id @default(cuid())
+  startDate     DateTime
+  endDate       DateTime
+  rentAmount    Float
+  depositAmount Float
+  status        String   @default("ACTIVE") // ACTIVE, TERMINATED, EXPIRED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  unitId        String
+  unit          Unit     @relation(fields: [unitId], references: [id])
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  transactions  Transaction[]
+  maintenanceRequests MaintenanceRequest[]
+  documents     Document[]
+}
+
+model MaintenanceRequest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status      String   @default("OPEN")   // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  leaseId     String?
+  lease       Lease?    @relation(fields: [leaseId], references: [id])
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  documents   Document[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  amount      Float
+  type        String   // INCOME, EXPENSE
+  category    String   // RENT, MAINTENANCE, UTILITIES, TAX, OTHER
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  leaseId     String?
+  lease       Lease?   @relation(fields: [leaseId], references: [id])
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  source      String?
+  status      String   @default("NEW") // NEW, CONTACTED, QUALIFIED, VIEWING, LEASE_SENT, CLOSED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  type        String   // LEASE, ID, INSURANCE, OTHER
+  size        Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  tenantId    String?
+  tenant      Tenant?   @relation(fields: [tenantId], references: [id])
+  leaseId     String?
+  lease       Lease?    @relation(fields: [leaseId], references: [id])
+  maintenanceId String?
+  maintenance   MaintenanceRequest? @relation(fields: [maintenanceId], references: [id])
+}
+
+model Project {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  status      String      @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  propertyId  String
+  property    Property    @relation(fields: [propertyId], references: [id])
+  milestones  Milestone[]
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  status      String    @default("PENDING") // PENDING, COMPLETED
+  amount      Float     // Amount to be invoiced upon completion
+  completedAt DateTime?
+
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invoice     Invoice?
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  number      String    @unique
+  amount      Float
+  status      String    @default("UNPAID") // UNPAID, PAID, OVERDUE
+  dueDate     DateTime
+  issuedAt    DateTime  @default(now())
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  milestoneId String?   @unique
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+}
