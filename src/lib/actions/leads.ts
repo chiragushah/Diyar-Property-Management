@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { hasPermission } from "@/lib/permissions"
+import { scoreLead } from "@/lib/ai"
 
 async function checkPermission(action: any, resource: any) {
   const session = await getServerSession(authOptions)
@@ -44,10 +45,15 @@ export async function createLead(data: {
 }) {
   const session = await checkPermission("CREATE", "CRM")
 
+  // AI Scoring
+  const aiResult = await scoreLead(data)
+
   const lead = await prisma.lead.create({
     data: {
       ...data,
-      assignedToId: (session.user as any).id
+      assignedToId: (session.user as any).id,
+      aiScore: aiResult.score,
+      aiSummary: aiResult.summary
     }
   })
 

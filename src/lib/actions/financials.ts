@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { askAI } from "@/lib/ai"
 
 export async function getTransactions() {
   const session = await getServerSession(authOptions)
@@ -61,4 +62,20 @@ export async function getFinancialSummary() {
     totalExpenses: expenses,
     netProfit: income - expenses
   }
+}
+
+export async function getAIFinancialForecast() {
+  const session = await getServerSession(authOptions)
+  if (!session) throw new Error("Unauthorized")
+
+  const transactions = await prisma.transaction.findMany({
+    take: 50,
+    orderBy: { date: "desc" }
+  })
+
+  const prompt = `Based on these recent property transactions, provide a financial forecast for the next 3 months.
+  Transactions: ${JSON.stringify(transactions)}
+  Provide a concise summary and estimate the expected net profit.`
+
+  return await askAI(prompt)
 }

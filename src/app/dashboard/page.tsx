@@ -13,6 +13,7 @@ import {
   ArrowDownRight
 } from "lucide-react"
 import AnalyticsWrapper from "@/components/dashboard/analytics-wrapper"
+import AIChat from "@/components/dashboard/ai-chat"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -91,7 +92,14 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <AnalyticsWrapper />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <AnalyticsWrapper />
+        </div>
+        <div>
+          <AIChat />
+        </div>
+      </div>
     </div>
   )
 }

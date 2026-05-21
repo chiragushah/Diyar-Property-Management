@@ -13,7 +13,6 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core"
 import {
-  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable"
@@ -21,7 +20,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Clock, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Plus, Clock, AlertCircle, CheckCircle2, Bot } from "lucide-react"
 import { getMaintenanceRequests, updateMaintenanceStatus } from "@/lib/actions/maintenance"
 
 const COLUMNS = [
@@ -177,6 +176,10 @@ function RequestCard({ request, isDragging }: { request: Request, isDragging?: b
           </Badge>
         </div>
         <p className="text-xs text-slate-500 line-clamp-2">{request.description}</p>
+        <div className="flex items-center gap-1 text-[10px] text-blue-600 font-medium bg-blue-50 px-1.5 py-0.5 rounded w-fit">
+          <Bot className="w-3 h-3" />
+          AI Prioritized
+        </div>
         {request.lease && (
           <div className="pt-2 border-t text-[10px] text-slate-400">
             {request.lease.unit.property.name} - Unit {request.lease.unit.unitNumber}

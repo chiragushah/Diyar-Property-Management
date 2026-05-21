@@ -38,6 +38,8 @@ interface Lead {
   email: string
   phone: string | null
   status: string
+  aiScore: number | null
+  aiSummary: string | null
 }
 
 export default function CRMPage() {
@@ -168,7 +170,19 @@ function LeadCard({ lead, isDragging }: { lead: Lead, isDragging?: boolean }) {
       className="cursor-grab active:cursor-grabbing hover:border-blue-400 transition-colors shadow-sm"
     >
       <CardContent className="p-4 space-y-3">
-        <div className="font-medium text-slate-900">{lead.name}</div>
+        <div className="flex justify-between items-start gap-2">
+          <div className="font-medium text-slate-900">{lead.name}</div>
+          {lead.aiScore && (
+            <Badge className={`${lead.aiScore >= 80 ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"} text-[10px]`}>
+              Score: {lead.aiScore}
+            </Badge>
+          )}
+        </div>
+        {lead.aiSummary && (
+          <p className="text-[10px] text-blue-600 bg-blue-50 p-1.5 rounded italic">
+            "{lead.aiSummary}"
+          </p>
+        )}
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Mail className="w-3 h-3" />

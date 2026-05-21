@@ -29,6 +29,12 @@ A full-featured Property Management System (PMS) and CRM built with Next.js 15, 
 - Real-time financial summary (Income, Expenses, Net Profit).
 - Visual analytics using Recharts on the main dashboard.
 
+### 🤖 AI-Powered Insights (Google Gemini)
+- **AI Maintenance Triage**: Automatically prioritizes repair requests based on severity.
+- **Intelligent Lead Scoring**: Predicts lead conversion potential in the CRM.
+- **Predictive Financials**: Forecasts future cash flow based on transaction trends.
+- **AI Leasing Assistant**: Integrated chatbot to help managers with daily tasks and queries.
+
 ## 🚀 Tech Stack
 - **Framework**: Next.js (App Router)
 - **Language**: TypeScript
@@ -43,6 +49,7 @@ A full-featured Property Management System (PMS) and CRM built with Next.js 15, 
 ### Prerequisites
 - Node.js 18+
 - npm
+- Google Gemini API Key (Free tier available)
 
 ### Installation
 1. Clone the repository
@@ -50,11 +57,18 @@ A full-featured Property Management System (PMS) and CRM built with Next.js 15, 
    ```bash
    npm install
    ```
-3. Set up the database:
+3. Set up environment variables in `.env`:
+   ```bash
+   NEXTAUTH_SECRET=your_secret
+   NEXTAUTH_URL=http://localhost:3000
+   DATABASE_URL=file:./dev.db
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+4. Set up the database:
    ```bash
    npx prisma db push
    ```
-4. Start the development server:
+5. Start the development server:
    ```bash
    npm run dev
    ```
