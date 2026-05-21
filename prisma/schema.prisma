@@ -64,6 +64,13 @@ model Unit {
   floor       String?
   rentAmount  Float
   status      String   @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
+
+  // Marketplace / Listing fields
+  isListed         Boolean @default(false)
+  listingTitle     String?
+  listingPrice     Float?
+  listingDescription String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -115,6 +122,11 @@ model MaintenanceRequest {
   description String
   priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   status      String   @default("OPEN")   // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+
+  // Service excellence fields
+  inspectionData String?   // JSON string of inspection checklist
+  completionPhoto String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -123,7 +135,22 @@ model MaintenanceRequest {
   lease       Lease?    @relation(fields: [leaseId], references: [id])
   userId      String?
   user        User?     @relation(fields: [userId], references: [id])
+  vendorId    String?
+  vendor      Vendor?   @relation(fields: [vendorId], references: [id])
   documents   Document[]
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  name        String
+  serviceType String   // PLUMBING, ELECTRICAL, CLEANING, etc.
+  email       String   @unique
+  phone       String?
+  rating      Float    @default(5.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requests    MaintenanceRequest[]
 }
 
 model Transaction {
@@ -133,12 +160,15 @@ model Transaction {
   category    String   // RENT, MAINTENANCE, UTILITIES, TAX, OTHER
   description String?
   date        DateTime @default(now())
+  paymentDate DateTime?
+  status      String   @default("COMPLETED") // PENDING, COMPLETED, FAILED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   leaseId     String?
   lease       Lease?   @relation(fields: [leaseId], references: [id])
+  invoiceId   String?
 }
 
 model Lead {
@@ -215,6 +245,7 @@ model Invoice {
   status      String    @default("UNPAID") // UNPAID, PAID, OVERDUE
   dueDate     DateTime
   issuedAt    DateTime  @default(now())
+  stripeId    String?   @unique
 
   userId      String
   user        User      @relation(fields: [userId], references: [id])

@@ -68,13 +68,24 @@ export async function completeMilestone(milestoneId: string) {
     include: { project: { include: { property: true } } }
   })
 
+  // Find the primary tenant or owner associated with this property to invoice
+  const lease = await prisma.lease.findFirst({
+    where: {
+      unit: { propertyId: milestone.project.propertyId },
+      status: "ACTIVE"
+    },
+    include: { tenant: true }
+  })
+
+  const invoiceTargetId = lease?.tenantId || (session.user as any).id
+
   // Generate invoice automatically upon milestone completion
   await createInvoice({
     amount: milestone.amount,
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    userId: (session.user as any).id, // In a real app, this might be the client/owner
+    userId: invoiceTargetId,
     milestoneId: milestone.id,
-    description: `Invoice for milestone: ${milestone.title} (${milestone.project.name})`
+    description: `Project Milestone: ${milestone.title} - ${milestone.project.name}`
   })
 
   revalidatePath("/dashboard/projects")

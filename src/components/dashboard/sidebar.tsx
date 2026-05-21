@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   Target,
+  Globe,
+  BarChart3,
   FolderOpen,
   Briefcase,
   Receipt,
@@ -22,6 +24,9 @@ import {
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Target, label: "CRM (Leads)", href: "/dashboard/crm" },
+  { icon: Globe, label: "Marketplace", href: "/dashboard/marketplace" },
+  { icon: BarChart3, label: "Owner Insights", href: "/dashboard/owner" },
+  { icon: Wrench, label: "Vendors", href: "/dashboard/vendor" },
   { icon: Building2, label: "Properties", href: "/dashboard/properties" },
   { icon: Users, label: "Tenants", href: "/dashboard/tenants" },
   { icon: FileText, label: "Leases", href: "/dashboard/leases" },

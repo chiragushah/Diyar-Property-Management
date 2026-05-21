@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FileDown, MoreHorizontal, Calendar, CreditCard } from "lucide-react"
 import { format } from "date-fns"
+import { PaymentButton } from "@/components/dashboard/payment-button"
 
 export default async function InvoicesPage() {
   const invoices = await getInvoices()
@@ -70,7 +71,10 @@ export default async function InvoicesPage() {
                   ${invoice.amount.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end items-center gap-2">
+                    {invoice.status !== "PAID" && (
+                      <PaymentButton invoiceId={invoice.id} />
+                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <FileDown className="w-4 h-4" />
                     </Button>
