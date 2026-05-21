@@ -1,3 +1,5 @@
+"use server"
+
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
@@ -6,7 +8,7 @@ export async function askAI(prompt: string) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       console.warn("GEMINI_API_KEY is not set. AI features will be limited.")
-      return "AI service is currently unavailable."
+      return "AI service is currently unavailable. Please set the GEMINI_API_KEY in your environment variables."
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
@@ -15,7 +17,7 @@ export async function askAI(prompt: string) {
     return response.text()
   } catch (error) {
     console.error("AI Error:", error)
-    return "Error communicating with AI service."
+    return "Error communicating with AI service. Check your API key and network connection."
   }
 }
 
@@ -34,7 +36,9 @@ export async function scoreLead(data: any) {
 
   const response = await askAI(prompt)
   try {
-    return JSON.parse(response)
+    // Basic cleanup in case AI adds markdown
+    const jsonStr = response.replace(/```json/g, "").replace(/```/g, "").trim()
+    return JSON.parse(jsonStr)
   } catch {
     return { score: 50, summary: "Could not analyze lead." }
   }

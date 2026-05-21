@@ -15,6 +15,8 @@ import {
 import {
   sortableKeyboardCoordinates,
   useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Card, CardContent } from "@/components/ui/card"
@@ -72,9 +74,13 @@ export default function CRMPage() {
     if (!over) return
 
     const leadId = active.id as string
-    const newStatus = over.id as string
+    const overId = over.id as string
 
-    if (STAGES.some(s => s.id === newStatus)) {
+    // Find if we dropped over a column (stage) or another lead
+    const overStage = STAGES.find(s => s.id === overId)
+    const newStatus = overStage ? overId : leads.find(l => l.id === overId)?.status
+
+    if (newStatus && STAGES.some(s => s.id === newStatus)) {
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l))
       await updateLeadStatus(leadId, newStatus)
     }
@@ -137,11 +143,13 @@ function KanbanColumn({ id, title, leads }: { id: string, title: string, leads: 
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </div>
-      <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[100px]">
-        {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
-        ))}
-      </div>
+      <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[100px]">
+          {leads.map((lead) => (
+            <LeadCard key={lead.id} lead={lead} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   )
 }

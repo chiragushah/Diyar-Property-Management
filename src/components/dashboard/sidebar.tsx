@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { signOut } from "next-auth/react"
 import {
   LayoutDashboard,
   Building2,
@@ -35,7 +38,7 @@ export default function Sidebar() {
       <div className="p-6">
         <h1 className="text-2xl font-bold text-blue-400">PropMgmt CRM</h1>
       </div>
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto font-sans">
         {menuItems.map((item) => (
           <Link
             key={item.label}
@@ -47,8 +50,11 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-slate-800">
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-slate-800 transition-colors">
+      <div className="p-4 border-t border-slate-800 font-sans">
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-slate-800 transition-colors"
+        >
           <LogOut size={20} />
           <span>Logout</span>
         </button>

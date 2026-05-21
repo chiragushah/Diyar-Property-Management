@@ -15,6 +15,8 @@ import {
 import {
   sortableKeyboardCoordinates,
   useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Card, CardContent } from "@/components/ui/card"
@@ -69,9 +71,12 @@ export default function MaintenancePage() {
     if (!over) return
 
     const requestId = active.id as string
-    const newStatus = over.id as string
+    const overId = over.id as string
 
-    if (COLUMNS.some(c => c.id === newStatus)) {
+    const overColumn = COLUMNS.find(c => c.id === overId)
+    const newStatus = overColumn ? overId : requests.find(r => r.id === overId)?.status
+
+    if (newStatus && COLUMNS.some(c => c.id === newStatus)) {
       setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r))
       await updateMaintenanceStatus(requestId, newStatus)
     }
@@ -129,11 +134,13 @@ function MaintenanceColumn({ column, requests }: { column: any, requests: Reques
         <h3 className="font-semibold text-slate-700">{column.title}</h3>
         <Badge variant="secondary" className="ml-auto bg-white">{requests.length}</Badge>
       </div>
-      <div className="flex flex-col gap-3">
-        {requests.map((request) => (
-          <RequestCard key={request.id} request={request} />
-        ))}
-      </div>
+      <SortableContext items={requests.map(r => r.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-col gap-3">
+          {requests.map((request) => (
+            <RequestCard key={request.id} request={request} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   )
 }

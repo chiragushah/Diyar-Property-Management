@@ -1,4 +1,4 @@
-# PropMgmt CRM - Comprehensive Property Management System
+# PropMgmt CRM - AI-Enhanced Property Management System
 
 A full-featured Property Management System (PMS) and CRM built with Next.js 15, Prisma, and Tailwind CSS.
 
@@ -10,91 +10,77 @@ A full-featured Property Management System (PMS) and CRM built with Next.js 15, 
 - Role-based access control for Managers, Owners, and Tenants.
 
 ### 🎯 CRM (Leads Pipeline)
-- **Kanban Board**: Drag-and-drop interface for moving leads through customizable stages (New, Contacted, Qualified, Viewing, Lease Sent, Closed).
+- **AI Lead Scoring**: Automatically predicts conversion potential for every lead.
+- **Kanban Board**: Drag-and-drop interface for moving leads through customizable stages.
 - Lead tracking and assignment.
-- Automated status updates.
+
+### 🛠️ Maintenance & AI Triage
+- Kanban board for tracking repair requests.
+- **AI Triage**: Intelligently analyzes issue descriptions to set priority levels automatically.
 
 ### 📂 Document Management System (DMS)
 - Centralized repository for all property-related documents.
 - Support for Lease agreements, IDs, Insurance, and Maintenance records.
-- Metadata tracking (size, type, linked entities).
 
-### 🛠️ Maintenance Module
-- Kanban board for tracking repair requests.
-- Priority levels (Low, Medium, High, Urgent).
-- Link requests to specific leases and units.
+### 📊 Projects & Invoicing
+- Track property improvements via milestones.
+- **Automatic Invoicing**: Invoices are generated and sent instantly when a milestone is marked as complete.
 
-### 📊 Financials & Analytics
+### 💰 Financials & Predictive AI
 - Transaction ledger for income and expenses.
-- Real-time financial summary (Income, Expenses, Net Profit).
-- Visual analytics using Recharts on the main dashboard.
-
-### 🤖 AI-Powered Insights (Google Gemini)
-- **AI Maintenance Triage**: Automatically prioritizes repair requests based on severity.
-- **Intelligent Lead Scoring**: Predicts lead conversion potential in the CRM.
-- **Predictive Financials**: Forecasts future cash flow based on transaction trends.
-- **AI Leasing Assistant**: Integrated chatbot to help managers with daily tasks and queries.
+- **Financial Forecasting**: AI-powered insights that predict future cash flow trends.
 
 ## 🚀 Tech Stack
-- **Framework**: Next.js (App Router)
-- **Language**: TypeScript
-- **Database**: SQLite with Prisma ORM
-- **UI**: shadcn/ui, Tailwind CSS, Lucide React
+- **Framework**: Next.js 15 (App Router)
+- **AI**: Google Gemini (Flash 1.5)
+- **Database**: SQLite (Dev) / Any SQL (Prod) via Prisma ORM
+- **UI**: shadcn/ui, Tailwind CSS, Recharts
 - **Auth**: NextAuth.js
-- **Drag & Drop**: @dnd-kit
-- **Charts**: Recharts
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - npm
-- Google Gemini API Key (Free tier available)
+- Google Gemini API Key
 
 ### Installation
 1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
+2. Install dependencies: `npm install`
+3. Configure `.env`:
+   ```env
+   DATABASE_URL="file:./dev.db"
+   NEXTAUTH_SECRET="your-secret-here"
+   NEXTAUTH_URL="http://localhost:3000"
+   GEMINI_API_KEY="your-gemini-key"
    ```
-3. Set up environment variables in `.env`:
-   ```bash
-   NEXTAUTH_SECRET=your_secret
-   NEXTAUTH_URL=http://localhost:3000
-   DATABASE_URL=file:./dev.db
-   GEMINI_API_KEY=your_gemini_api_key
-   ```
-4. Set up the database:
-   ```bash
-   npx prisma db push
-   ```
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
+4. Setup Database: `npx prisma db push`
+5. Run Dev: `npm run dev`
 
-## 🚢 Hosting & Deployment
+## 🚢 Deployment Guide
 
-### Vercel (Recommended)
-1. Push your code to a GitHub repository.
-2. Import the project in Vercel.
-3. Add the following environment variables:
-   - `NEXTAUTH_SECRET`: A random string for auth.
-   - `NEXTAUTH_URL`: Your deployment URL.
-   - `DATABASE_URL`: If using a hosted database like PostgreSQL (update `prisma/schema.prisma` provider to `postgresql`).
-4. Vercel will automatically detect Next.js and deploy.
+### Option 1: Vercel (Recommended)
+1. Push code to GitHub.
+2. Link repository in Vercel Dashboard.
+3. Add Environment Variables (as above).
+4. **Important**: For production, use a hosted database (PostgreSQL/MySQL) and update `DATABASE_URL`.
+5. Deploy!
 
-### Docker
+### Option 2: Docker
 1. Build the image:
    ```bash
    docker build -t propmgmt-crm .
    ```
 2. Run the container:
    ```bash
-   docker run -p 3000:3000 propmgmt-crm
+   docker run -p 3000:3000 \
+     -e NEXTAUTH_SECRET=your_secret \
+     -e NEXTAUTH_URL=http://your-domain.com \
+     -e GEMINI_API_KEY=your_key \
+     propmgmt-crm
    ```
 
-## 🔒 Security
-- Password hashing with bcrypt.
-- Protected API routes and Server Actions.
-- Session-based authentication.
+### Option 3: Manual Production Server
+1. Build locally: `npm run build`
+2. Start server: `npm start`
+3. Use a process manager like **PM2** to keep it running: `pm2 start npm -- name "propmgmt" -- start`

@@ -8,8 +8,8 @@ import {
   TableRow
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Shield, User as UserIcon } from "lucide-react"
+import { RoleSelector } from "./role-selector"
 
 export default async function UsersPage() {
   const users = await getUsers()
@@ -28,7 +28,7 @@ export default async function UsersPage() {
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Custom Permissions</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">Manage Role</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -63,7 +63,7 @@ export default async function UsersPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">Edit Roles</Button>
+                  <RoleSelector userId={user.id} currentRole={user.role} />
                 </TableCell>
               </TableRow>
             ))}

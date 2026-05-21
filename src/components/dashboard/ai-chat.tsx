@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Bot, Send, User } from "lucide-react"
+import { Bot, Send } from "lucide-react"
 
 export default function AIChat() {
   const [messages, setMessages] = useState<{ role: "ai" | "user"; content: string }[]>([
@@ -24,6 +24,7 @@ export default function AIChat() {
     setLoading(true)
 
     try {
+      // Calling the server action 'askAI'
       const response = await askAI(input)
       setMessages(prev => [...prev, { role: "ai", content: response }])
     } catch (error) {
