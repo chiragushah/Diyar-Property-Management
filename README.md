@@ -1,6 +1,6 @@
-# PropMgmt CRM - AI-Enhanced Property Management System
+# PropSphere - AI-Enhanced Property Management System
 
-A full-featured Property Management System (PMS) and CRM built with Next.js 15, Prisma, and Tailwind CSS.
+**PropSphere** is a comprehensive, production-ready Property Management and CRM system built with Next.js 15, Prisma (SQLite), and Google Gemini AI.
 
 ## 🌟 Key Features
 

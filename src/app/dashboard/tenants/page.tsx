@@ -1,6 +1,9 @@
-import { getTenants } from "@/lib/actions/tenants"
+"use client"
+
+import React, { useState } from "react"
+import { getTenants, createTenant } from "@/lib/actions/tenants"
 import { Button } from "@/components/ui/button"
-import { Plus, User, Phone, Mail, Home } from "lucide-react"
+import { Plus, User, Phone, Mail, Home, Loader2 } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -10,10 +13,65 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
-export default async function TenantsPage() {
-  const tenants = await getTenants()
+interface Tenant {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string | null
+  leases: any[]
+}
+
+export default function TenantsPage() {
+  const [tenants, setTenants] = useState<Tenant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  React.useEffect(() => {
+    async function load() {
+      const data = await getTenants()
+      setTenants(data as unknown as Tenant[])
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const handleAddTenant = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const formData = new FormData(e.currentTarget)
+
+    try {
+      const data = {
+        firstName: formData.get("firstName") as string,
+        lastName: formData.get("lastName") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+      }
+
+      const newTenant = await createTenant(data)
+      setTenants(prev => [{ ...newTenant, leases: [] } as unknown as Tenant, ...prev])
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (loading) return <div className="p-8">Loading tenants...</div>
 
   return (
     <div className="space-y-6">
@@ -22,10 +80,51 @@ export default async function TenantsPage() {
           <h1 className="text-3xl font-bold">Tenants</h1>
           <p className="text-slate-500">Manage your tenant relationships and leases</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Tenant
-        </Button>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger render={<Button />}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Tenant
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Tenant</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddTenant} className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" name="firstName" placeholder="John" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" name="lastName" placeholder="Doe" required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" name="email" type="email" placeholder="john@example.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" name="phone" placeholder="+1 (555) 000-0000" />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : "Create Tenant"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm">

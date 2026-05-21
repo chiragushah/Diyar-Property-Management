@@ -22,8 +22,19 @@ import { CSS } from "@dnd-kit/utilities"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Clock, AlertCircle, CheckCircle2, Bot } from "lucide-react"
-import { getMaintenanceRequests, updateMaintenanceStatus } from "@/lib/actions/maintenance"
+import { Plus, Clock, AlertCircle, CheckCircle2, Bot, Loader2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { getMaintenanceRequests, updateMaintenanceStatus, createMaintenanceRequest } from "@/lib/actions/maintenance"
 
 const COLUMNS = [
   { id: "OPEN", title: "To Do", icon: AlertCircle, color: "text-blue-500" },
@@ -45,6 +56,8 @@ export default function MaintenancePage() {
   const [requests, setRequests] = useState<Request[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   React.useEffect(() => {
     async function load() {
@@ -84,6 +97,27 @@ export default function MaintenancePage() {
     setActiveId(null)
   }
 
+  const handleAddRequest = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const formData = new FormData(e.currentTarget)
+
+    try {
+      const data = {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+      }
+
+      const newRequest = await createMaintenanceRequest(data)
+      setRequests(prev => [newRequest as unknown as Request, ...prev])
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (loading) return <div>Loading...</div>
 
   return (
@@ -93,10 +127,47 @@ export default function MaintenancePage() {
           <h1 className="text-3xl font-bold">Maintenance</h1>
           <p className="text-slate-500">Track and manage repair requests</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          New Request
-        </Button>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger render={<Button />}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Request
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New Maintenance Request</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddRequest} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Issue Title</Label>
+                <Input id="title" name="title" placeholder="Broken AC, Leaking Pipe..." required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Detailed Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Please describe the issue in detail. AI will analyze the priority based on your description."
+                  className="h-32"
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing & Creating...
+                    </>
+                  ) : "Submit Request"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <DndContext

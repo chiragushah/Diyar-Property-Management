@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,8 +52,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <Card className="w-full max-w-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
+      <div className="mb-8 flex flex-col items-center gap-2">
+        <Image
+          src="/dynaimers-logo.jpg"
+          alt="Dynaimers Logo"
+          width={150}
+          height={50}
+          className="rounded-lg shadow-sm"
+        />
+        <h1 className="text-2xl font-bold text-blue-600">PropSphere</h1>
+      </div>
+
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
           <CardDescription className="text-center">
@@ -124,6 +136,13 @@ export default function RegisterPage() {
           </CardFooter>
         </form>
       </Card>
+
+      <div className="mt-8 text-center">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Conceptualized and Developed by<br/>
+          <span className="font-semibold text-slate-500">Dynaimers Consulting Pvt. Ltd.</span>
+        </p>
+      </div>
     </div>
   )
 }

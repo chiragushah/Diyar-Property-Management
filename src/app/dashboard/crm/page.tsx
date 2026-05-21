@@ -22,8 +22,19 @@ import { CSS } from "@dnd-kit/utilities"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Mail, Phone, MoreHorizontal } from "lucide-react"
-import { updateLeadStatus, getLeads } from "@/lib/actions/leads"
+import { Plus, Mail, Phone, MoreHorizontal, Loader2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { updateLeadStatus, getLeads, createLead } from "@/lib/actions/leads"
 
 const STAGES = [
   { id: "NEW", title: "New Lead" },
@@ -48,6 +59,8 @@ export default function CRMPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   React.useEffect(() => {
     async function loadLeads() {
@@ -88,6 +101,29 @@ export default function CRMPage() {
     setActiveId(null)
   }
 
+  const handleAddLead = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const formData = new FormData(e.currentTarget)
+
+    try {
+      const data = {
+        name: formData.get("name") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+        notes: formData.get("notes") as string,
+      }
+
+      const newLead = await createLead(data)
+      setLeads(prev => [newLead as unknown as Lead, ...prev])
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (loading) return <div>Loading...</div>
 
   return (
@@ -97,10 +133,49 @@ export default function CRMPage() {
           <h1 className="text-3xl font-bold">CRM Pipeline</h1>
           <p className="text-slate-500">Drag and drop leads across different stages</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Lead
-        </Button>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger render={<Button />}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Lead
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Lead</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddLead} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" name="name" placeholder="John Doe" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" name="email" type="email" placeholder="john@example.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" name="phone" placeholder="+1 (555) 000-0000" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Initial Notes</Label>
+                <Textarea id="notes" name="notes" placeholder="Interested in 2-bedroom units..." />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : "Create Lead"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <DndContext

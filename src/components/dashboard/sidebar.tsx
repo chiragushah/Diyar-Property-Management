@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { signOut } from "next-auth/react"
 import {
   LayoutDashboard,
@@ -36,7 +37,7 @@ export default function Sidebar() {
   return (
     <div className="flex flex-col w-64 h-screen bg-slate-900 text-white">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-blue-400">PropMgmt CRM</h1>
+        <h1 className="text-2xl font-bold text-blue-400">PropSphere</h1>
       </div>
       <nav className="flex-1 px-4 space-y-2 overflow-y-auto font-sans">
         {menuItems.map((item) => (
@@ -53,11 +54,25 @@ export default function Sidebar() {
       <div className="p-4 border-t border-slate-800 font-sans">
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-slate-800 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-slate-800 transition-colors mb-4"
         >
           <LogOut size={20} />
           <span>Logout</span>
         </button>
+
+        <div className="mt-auto pt-4 border-t border-slate-800 flex flex-col items-center gap-2">
+          <Image
+            src="/dynaimers-logo.jpg"
+            alt="Dynaimers Logo"
+            width={120}
+            height={40}
+            className="rounded opacity-80"
+          />
+          <p className="text-[10px] text-slate-500 text-center leading-tight">
+            Conceptualized and Developed by<br/>
+            <span className="font-semibold">Dynaimers Consulting Pvt. Ltd.</span>
+          </p>
+        </div>
       </div>
     </div>
   )
